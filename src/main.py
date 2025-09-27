@@ -11,11 +11,12 @@ import json
 import os
 import platform
 import subprocess
+import random  # <-- Added missing import
+import uuid
+import signal
 from pathlib import Path
 from typing import Optional, Dict, Any
 from datetime import datetime
-import signal
-import uuid
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
@@ -1236,9 +1237,10 @@ Memory Used: {self.format_bytes(memory.used)}
                     try:
                         os.startfile(str(report_file))  # Windows
                     except AttributeError:
-                        subprocess.run(['open', str(report_file)])  # macOS
-                    except:
-                        subprocess.run(['xdg-open', str(report_file)])  # Linux
+                        try:
+                            subprocess.run(['open', str(report_file)])  # macOS
+                        except:
+                            subprocess.run(['xdg-open', str(report_file)])  # Linux
             
             def generate_html_report(self, data):
                 """Generate HTML report content"""
