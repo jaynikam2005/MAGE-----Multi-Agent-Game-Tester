@@ -55,3 +55,15 @@
 2025-09-28 03:15:37,313 - __main__ - INFO - Initiating graceful shutdown...
 2025-09-28 03:15:37,314 - src.security.encryption - INFO - Security manager cleanup completed
 2025-09-28 03:15:37,314 - __main__ - INFO - Shutdown complete
+2025-09-28 03:21:06,400 - src.core.logger - INFO - Logging system initialized successfully
+2025-09-28 03:21:06,401 - __main__ - INFO - === Multi-Agent Game Tester Pro Starting ===
+2025-09-28 03:21:06,401 - src.security.encryption - INFO - Security manager initialized (minimal mode)
+2025-09-28 03:21:06,401 - __main__ - INFO - Security manager initialized successfully
+2025-09-28 03:21:06,401 - src.database.connection - INFO - Database manager initialized (minimal mode)
+2025-09-28 03:21:06,401 - __main__ - INFO - Database manager initialized successfully
+2025-09-28 03:21:06,442 - src.api.server - INFO - API server started (minimal mode) on port 8000
+2025-09-28 03:21:06,442 - __main__ - INFO - API server started on port 8000
+2025-09-28 03:21:06,981 - __main__ - INFO - Standard GUI initialized successfully
+2025-09-28 03:21:27,719 - __main__ - INFO - Initiating graceful shutdown...
+2025-09-28 03:21:27,719 - src.security.encryption - INFO - Security manager cleanup completed
+2025-09-28 03:21:27,719 - __main__ - INFO - Shutdown complete
