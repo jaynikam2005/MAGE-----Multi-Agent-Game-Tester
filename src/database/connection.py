@@ -1,4 +1,4 @@
-﻿"""
+"""
 Minimal Database Manager
 """
 

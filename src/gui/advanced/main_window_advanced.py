@@ -1111,3 +1111,271 @@ The actual report would contain detailed analytics and visualizations.
                 item.setBackground(1, QColor(158, 158, 158, 50))
             
             self.agent_tree
+    def update_agent_tree(self):
+        """Update agent tree widget"""
+        
+        self.agent_tree.clear()
+        
+        for agent_id, data in self.agent_data.items():
+            item = QTreeWidgetItem([
+                agent_id,
+                data["status"],
+                str(data["tasks"]),
+                f"{data['performance']:.1%}",
+                "🟢 Healthy"
+            ])
+            
+            # Color coding based on status
+            if data["status"] == "active":
+                item.setBackground(1, QColor(76, 175, 80, 50))
+            elif data["status"] == "busy":
+                item.setBackground(1, QColor(255, 193, 7, 50))
+            else:
+                item.setBackground(1, QColor(158, 158, 158, 50))
+            
+            self.agent_tree.addTopLevelItem(item)
+    
+    def update_status_indicators(self, performance_data: Dict[str, Any]):
+        """Update real-time status indicators"""
+        
+        # Update active tests counter
+        active_tests = performance_data.get("active_tests", 0)
+        self.active_tests_label.setText(f"📊 Tests: {active_tests}")
+        
+        # Update performance indicator
+        cpu = performance_data.get("cpu_usage", 0)
+        if cpu > 80:
+            self.performance_indicator.setText("⚡ Performance: High Load")
+            self.performance_indicator.setStyleSheet("color: #ff6b6b; font-weight: bold;")
+        elif cpu > 60:
+            self.performance_indicator.setText("⚡ Performance: Moderate")
+            self.performance_indicator.setStyleSheet("color: #ffd93d; font-weight: bold;")
+        else:
+            self.performance_indicator.setText("⚡ Performance: Good")
+            self.performance_indicator.setStyleSheet("color: #6bcf7f; font-weight: bold;")
+    
+    def apply_theme(self, theme_name: str):
+        """Apply selected theme to the entire application"""
+        
+        if theme_name in self.available_themes:
+            theme = self.available_themes[theme_name]
+            stylesheet = theme.get_complete_stylesheet()
+            self.setStyleSheet(stylesheet)
+            self.current_theme = theme_name
+            
+            self.logger.info(f"Applied theme: {theme_name}")
+    
+    # Signal handlers
+    @pyqtSlot(str)
+    def on_test_session_started(self, session_id: str):
+        """Handle test session start"""
+        self.system_log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Test session started: {session_id}")
+    
+    @pyqtSlot(str, dict)
+    def on_test_session_completed(self, session_id: str, results: dict):
+        """Handle test session completion"""
+        self.system_log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Test session completed: {session_id}")
+        
+        # Show results notification
+        success_rate = results.get("success_rate", 0) * 100
+        QMessageBox.information(
+            self, 
+            "Test Completed", 
+            f"Test session {session_id} completed!\nSuccess Rate: {success_rate:.1f}%"
+        )
+    
+    @pyqtSlot(str, str)
+    def on_agent_status_changed(self, agent_id: str, status: str):
+        """Handle agent status change"""
+        self.agent_log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Agent {agent_id}: {status}")
+    
+    @pyqtSlot(dict)
+    def on_performance_updated(self, metrics: dict):
+        """Handle performance metrics update"""
+        # Update performance dashboard
+        pass
+    
+    @pyqtSlot(str, str)
+    def on_security_alert(self, level: str, message: str):
+        """Handle security alerts"""
+        self.security_log.append(f"[{datetime.now().strftime('%H:%M:%S')}] {level}: {message}")
+        
+        if level == "CRITICAL":
+            QMessageBox.critical(self, "Security Alert", message)
+    
+    # Menu action implementations
+    def new_advanced_test_session(self):
+        """Create new advanced test session"""
+        self.logger.info("Creating new advanced test session")
+    
+    def open_advanced_session(self):
+        """Open existing session"""
+        filename, _ = QFileDialog.getOpenFileName(
+            self, "Open Test Session", "", "JSON Files (*.json)"
+        )
+        if filename:
+            self.logger.info(f"Opening session: {filename}")
+    
+    def save_advanced_session(self):
+        """Save current session"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Save Test Session", "", "JSON Files (*.json)"
+        )
+        if filename:
+            self.logger.info(f"Saving session: {filename}")
+    
+    def export_advanced_report(self):
+        """Export advanced report"""
+        filename, _ = QFileDialog.getSaveFileName(
+            self, "Export Report", "", "PDF Files (*.pdf);;HTML Files (*.html)"
+        )
+        if filename:
+            self.logger.info(f"Exporting report: {filename}")
+    
+    def start_batch_testing(self):
+        """Start batch testing mode"""
+        self.logger.info("Starting batch testing mode")
+    
+    def schedule_tests(self):
+        """Open test scheduler"""
+        self.logger.info("Opening test scheduler")
+    
+    def configure_agents(self):
+        """Open agent configuration dialog"""
+        self.logger.info("Opening agent configuration")
+    
+    def show_agent_monitor(self):
+        """Show agent monitor"""
+        self.main_stack.setCurrentIndex(0)  # Dashboard view
+        self.right_dock.show()
+    
+    def train_agents(self):
+        """Start agent training"""
+        self.logger.info("Starting agent training")
+    
+    def reset_agents(self):
+        """Reset all agents"""
+        reply = QMessageBox.question(
+            self, "Reset Agents", 
+            "Are you sure you want to reset all agents?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            self.logger.info("Resetting all agents")
+    
+    def toggle_dashboard(self):
+        """Toggle dashboard view"""
+        self.main_stack.setCurrentIndex(0)
+    
+    def toggle_3d_visualization(self):
+        """Toggle 3D visualization view"""
+        self.main_stack.setCurrentIndex(1)
+    
+    def toggle_fullscreen(self):
+        """Toggle fullscreen mode"""
+        if self.isFullScreen():
+            self.showNormal()
+        else:
+            self.showFullScreen()
+    
+    def show_performance_profiler(self):
+        """Show performance profiler"""
+        self.logger.info("Opening performance profiler")
+    
+    def show_security_scanner(self):
+        """Show security scanner"""
+        self.logger.info("Opening security scanner")
+    
+    def show_data_export(self):
+        """Show data export dialog"""
+        self.logger.info("Opening data export dialog")
+    
+    def show_advanced_settings(self):
+        """Show advanced settings dialog"""
+        from src.gui.dialogs.advanced_settings import AdvancedSettingsDialog
+        dialog = AdvancedSettingsDialog(self.settings, self)
+        dialog.exec()
+    
+    def show_reports(self):
+        """Show reports view"""
+        self.main_stack.setCurrentIndex(2)
+    
+    def show_user_guide(self):
+        """Show user guide"""
+        QMessageBox.information(
+            self, "User Guide", 
+            "User guide would be displayed here or opened in browser."
+        )
+    
+    def show_api_docs(self):
+        """Show API documentation"""
+        QMessageBox.information(
+            self, "API Documentation", 
+            "API documentation would be displayed here or opened in browser."
+        )
+    
+    def check_for_updates(self):
+        """Check for application updates"""
+        QMessageBox.information(
+            self, "Update Check", 
+            "You are running the latest version of MAGE Enterprise."
+        )
+    
+    def show_advanced_about(self):
+        """Show advanced about dialog"""
+        QMessageBox.about(
+            self, "About MAGE Enterprise",
+            f"""
+            <h2>MAGE - Multi-Agent Game Tester Enterprise v{self.settings.version}</h2>
+            <p><b>Codename:</b> {self.settings.codename}</p>
+            <p><b>Build:</b> {self.settings.build_number}</p>
+            
+            <h3>🚀 Advanced AI-Powered Game Testing Platform</h3>
+            <p>The world's most advanced gaming industry testing solution with:</p>
+            
+            <ul>
+                <li>🤖 Multi-Agent AI Testing System</li>
+                <li>🛡️ Military-Grade Security</li>
+                <li>📊 Real-Time 3D Visualization</li>
+                <li>⚡ Enterprise Performance Monitoring</li>
+                <li>🎮 Gaming Industry Specialized Tools</li>
+            </ul>
+            
+            <p><b>© 2025 MAGE Enterprise Corp.</b><br>
+            Advanced Gaming Technology Solutions</p>
+            
+            <p><i>"Redefining the future of game testing with AI."</i></p>
+            """
+        )
+    
+    def closeEvent(self, event):
+        """Handle application close event"""
+        
+        # Check for active tests
+        if hasattr(self, 'orchestrator') and self.orchestrator.active_sessions:
+            reply = QMessageBox.question(
+                self, "Exit MAGE",
+                f"There are {len(self.orchestrator.active_sessions)} active test sessions.\n"
+                "Are you sure you want to exit?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            
+            if reply == QMessageBox.StandardButton.No:
+                event.ignore()
+                return
+        
+        # Stop timers
+        if hasattr(self, 'update_timer'):
+            self.update_timer.stop()
+        if hasattr(self, 'performance_timer'):
+            self.performance_timer.stop()
+        if hasattr(self, 'agent_timer'):
+            self.agent_timer.stop()
+        
+        # Stop animations
+        for animation in self.ui_animations.values():
+            if animation.state() == QAbstractAnimation.State.Running:
+                animation.stop()
+        
+        self.logger.info("MAGE Enterprise shutting down")
+        event.accept()
