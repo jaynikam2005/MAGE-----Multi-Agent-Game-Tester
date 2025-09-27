@@ -21,7 +21,8 @@ COPY pyproject.toml .
 RUN touch poetry.lock
 
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+    && poetry lock \
+    && poetry install --only main --no-interaction --no-ansi
 
 # Install additional dependencies for Playwright
 RUN apt-get update ; apt-get install -y \

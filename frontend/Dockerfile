@@ -10,7 +10,7 @@ COPY package*.json ./
 
 # Clear npm cache and install dependencies
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps
+    npm install --legacy-peer-deps --no-audit --no-fund --network-timeout=100000
 
 # Copy source
 COPY . .
