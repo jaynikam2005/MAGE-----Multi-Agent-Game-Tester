@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, List
 from functools import lru_cache
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -130,19 +130,17 @@ class Settings(BaseSettings):
     game_type: str = "number_puzzle"
     supported_languages: List[str] = ["English", "हिन्दी", "ಕನ್ನಡ", "தமிழ்", "తెలుగు"]
     
-    @validator("secret_key", "encryption_key", pre=True)
-    def generate_keys_if_empty(cls, v: str, field_name: str) -> str:
+    @field_validator("secret_key", "encryption_key")
+    @classmethod
+    def generate_keys_if_empty(cls, v: str) -> str:
         """Generate secure keys if not provided"""
         if not v:
             import secrets
-            if field_name == "encryption_key":
-                from cryptography.fernet import Fernet
-                return Fernet.generate_key().decode()
-            else:
-                return secrets.token_urlsafe(32)
+            return secrets.token_urlsafe(32)
         return v
     
-    @validator("data_dir", "log_dir", "reports_dir", "artifacts_dir", "temp_dir")
+    @field_validator("data_dir", "log_dir", "reports_dir", "artifacts_dir", "temp_dir")
+    @classmethod
     def create_directories(cls, v: Path) -> Path:
         """Ensure directories exist"""
         v.mkdir(parents=True, exist_ok=True)
@@ -159,10 +157,6 @@ class Settings(BaseSettings):
         password_part = f":{self.redis_password}@" if self.redis_password else ""
         protocol = "rediss" if self.redis_ssl else "redis"
         return f"{protocol}://{password_part}{self.redis_host}:{self.redis_port}/{self.redis_db}"
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
 
 
 @lru_cache()
