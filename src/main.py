@@ -9,7 +9,6 @@ import logging
 from pathlib import Path
 from typing import Optional
 import signal
-import os
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
