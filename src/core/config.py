@@ -1,165 +1,315 @@
 """
-Configuration Management with Advanced Security
+Enterprise-Grade Configuration Management
+Advanced Gaming Industry Focus with Military-Grade Security
 """
 
 import os
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from functools import lru_cache
+from enum import Enum
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
-    """Application settings with security-first approach"""
+class TestingMode(str, Enum):
+    """Advanced testing modes"""
+    PERFORMANCE = "performance"
+    STRESS = "stress"
+    LOAD = "load"
+    AI_BEHAVIOR = "ai_behavior"
+    GRAPHICS = "graphics"
+    NETWORK = "network"
+    SECURITY = "security"
+    ACCESSIBILITY = "accessibility"
+    CHAOS = "chaos"
+    VR_AR = "vr_ar"
+
+
+class GameGenre(str, Enum):
+    """Supported game genres"""
+    ACTION = "action"
+    RPG = "rpg"
+    STRATEGY = "strategy"
+    PUZZLE = "puzzle"
+    SIMULATION = "simulation"
+    RACING = "racing"
+    SPORTS = "sports"
+    MMORPG = "mmorpg"
+    BATTLE_ROYALE = "battle_royale"
+    MOBILE = "mobile"
+
+
+class Platform(str, Enum):
+    """Gaming platforms"""
+    PC = "pc"
+    CONSOLE_PS5 = "ps5"
+    CONSOLE_XBOX = "xbox"
+    MOBILE_IOS = "ios"
+    MOBILE_ANDROID = "android"
+    WEB = "web"
+    VR = "vr"
+    AR = "ar"
+    CLOUD = "cloud"
+
+
+class AdvancedSettings(BaseSettings):
+    """Enterprise gaming industry configuration with advanced features"""
     
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="ignore"  # Changed from "forbid" to "ignore" to handle extra env vars
+        extra="ignore"
     )
     
-    # Application
-    app_name: str = "Multi-Agent Game Tester Pro"
-    version: str = "1.0.0"
+    # Application Metadata
+    app_name: str = "MAGE - Multi-Agent Game Tester Enterprise"
+    version: str = "2.0.0"
+    build_number: str = "20250928"
+    codename: str = "Phoenix"
     debug: bool = False
-    environment: str = Field(default="production", description="Environment: development, staging, production")
+    environment: str = Field(default="enterprise", description="deployment environment")
     
-    # API Configuration
-    api_host: str = "127.0.0.1"
+    # Enterprise Licensing
+    enterprise_license_key: str = Field(default="", description="Enterprise license")
+    max_concurrent_users: int = 50
+    max_test_sessions: int = 100
+    license_expiry: Optional[str] = None
+    
+    # Advanced API Configuration
+    api_host: str = "0.0.0.0"  # Bind to all interfaces for enterprise
     api_port: int = 8000
-    api_workers: int = 4
+    api_workers: int = 8  # Increased for enterprise load
     api_reload: bool = False
+    enable_swagger: bool = True
+    enable_metrics: bool = True
     
-    # Database Configuration
+    # Database - Enterprise Grade
     db_host: str = "localhost"
     db_port: int = 5432
-    db_name: str = "game_tester_pro"
-    db_user: str = "postgres"
+    db_name: str = "mage_enterprise"
+    db_user: str = "mage_admin"
     db_password: str = Field(default="", description="Database password")
-    db_pool_size: int = 20
-    db_max_overflow: int = 30
+    db_pool_size: int = 50  # Enterprise pool size
+    db_max_overflow: int = 100
     db_pool_timeout: int = 30
     db_pool_recycle: int = 3600
     
-    # Redis Configuration
-    redis_host: str = "localhost"
-    redis_port: int = 6379
-    redis_db: int = 0
+    # Redis Cluster Configuration
+    redis_cluster_nodes: List[str] = ["localhost:7001", "localhost:7002", "localhost:7003"]
     redis_password: Optional[str] = None
-    redis_ssl: bool = False
+    redis_ssl: bool = True
+    redis_sentinel_service: str = "mage-redis"
     
-    # Security Configuration
-    secret_key: str = Field(default="", description="Secret key for encryption")
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_days: int = 7
-    password_min_length: int = 12
-    max_login_attempts: int = 5
-    lockout_duration_minutes: int = 30
+    # Advanced Security
+    secret_key: str = Field(default="", description="JWT secret")
+    encryption_algorithm: str = "AES-256-GCM"
+    key_derivation_iterations: int = 100000
+    session_timeout_minutes: int = 60
+    max_failed_attempts: int = 3
+    account_lockout_duration: int = 900  # 15 minutes
     
-    # Encryption
-    encryption_key: Optional[str] = Field(default=None, description="Fernet encryption key")
-    use_encryption: bool = True
+    # Multi-Factor Authentication
+    enable_2fa: bool = True
+    totp_issuer: str = "MAGE Enterprise"
+    backup_codes_count: int = 10
     
-    # OpenAI Configuration - THIS WAS MISSING!
+    # AI & Machine Learning
     openai_api_key: str = Field(default="", description="OpenAI API key")
     openai_model: str = "gpt-4-turbo-preview"
-    openai_max_tokens: int = 4000
-    openai_temperature: float = 0.7
+    claude_api_key: str = Field(default="", description="Anthropic Claude API key")
+    gemini_api_key: str = Field(default="", description="Google Gemini API key")
     
-    # LangChain Configuration
-    langchain_tracing: bool = False
-    langchain_project: str = "game-tester-agents"
+    # Advanced AI Configuration
+    ai_temperature: float = 0.7
+    ai_max_tokens: int = 8000
+    ai_context_window: int = 32000
+    enable_ai_memory: bool = True
+    ai_reasoning_chains: bool = True
     
-    # Web Testing Configuration
-    browser_headless: bool = True
-    browser_timeout: int = 30000
-    page_load_timeout: int = 60000
-    element_timeout: int = 10000
-    screenshot_quality: int = 90
+    # Game Testing Configuration
+    supported_genres: List[GameGenre] = [
+        GameGenre.ACTION, GameGenre.RPG, GameGenre.PUZZLE, 
+        GameGenre.STRATEGY, GameGenre.SIMULATION
+    ]
+    supported_platforms: List[Platform] = [
+        Platform.PC, Platform.WEB, Platform.MOBILE_ANDROID, Platform.MOBILE_IOS
+    ]
+    default_testing_modes: List[TestingMode] = [
+        TestingMode.PERFORMANCE, TestingMode.AI_BEHAVIOR, TestingMode.GRAPHICS
+    ]
     
-    # Selenium Grid
-    selenium_grid_url: Optional[str] = None
-    selenium_implicit_wait: int = 10
-    selenium_page_load_timeout: int = 60
+    # Advanced Browser Configuration
+    browser_pool_size: int = 10
+    enable_browser_clustering: bool = True
+    browser_types: List[str] = ["chromium", "firefox", "webkit", "edge"]
+    headless_ratio: float = 0.8  # 80% headless, 20% headed
     
-    # Playwright Configuration
-    playwright_browser: str = "chromium"  # chromium, firefox, webkit
-    playwright_viewport_width: int = 1920
-    playwright_viewport_height: int = 1080
-    playwright_user_agent: Optional[str] = None
+    # Performance Testing
+    max_virtual_users: int = 1000
+    ramp_up_duration: int = 300  # 5 minutes
+    test_duration: int = 3600    # 1 hour
+    performance_thresholds: Dict[str, float] = {
+        "response_time_95th": 2000,  # ms
+        "throughput_rps": 100,       # requests per second
+        "error_rate": 0.01,          # 1%
+        "memory_usage": 0.85,        # 85% of available
+        "cpu_usage": 0.80            # 80% of available
+    }
     
-    # File Storage
+    # Graphics Testing
+    enable_gpu_testing: bool = True
+    target_fps: int = 60
+    min_fps_threshold: int = 30
+    resolution_profiles: List[str] = [
+        "1920x1080", "2560x1440", "3840x2160", "1366x768"
+    ]
+    graphics_quality_levels: List[str] = ["low", "medium", "high", "ultra"]
+    
+    # AI Behavior Testing
+    ai_complexity_levels: List[str] = ["basic", "intermediate", "advanced", "expert"]
+    behavior_tree_depth: int = 8
+    decision_tree_nodes: int = 1000
+    pathfinding_algorithms: List[str] = ["A*", "Dijkstra", "JPS", "Hierarchical"]
+    
+    # Network Testing
+    network_simulation_profiles: List[str] = [
+        "3G", "4G", "5G", "WiFi", "Ethernet", "Poor", "Offline"
+    ]
+    latency_profiles: Dict[str, int] = {
+        "excellent": 20,    # ms
+        "good": 50,
+        "fair": 100,
+        "poor": 200,
+        "terrible": 500
+    }
+    
+    # Cloud Integration
+    aws_access_key: str = Field(default="", description="AWS access key")
+    aws_secret_key: str = Field(default="", description="AWS secret key")
+    aws_region: str = "us-west-2"
+    gcp_project_id: str = Field(default="", description="GCP project ID")
+    azure_subscription_id: str = Field(default="", description="Azure subscription")
+    
+    # Gaming Platform Integration
+    steam_api_key: str = Field(default="", description="Steam API key")
+    epic_client_id: str = Field(default="", description="Epic Games client ID")
+    xbox_app_id: str = Field(default="", description="Xbox Live app ID")
+    playstation_client_id: str = Field(default="", description="PlayStation client ID")
+    
+    # Advanced Analytics
+    enable_telemetry: bool = True
+    analytics_endpoint: str = "https://analytics.mage-enterprise.com"
+    enable_heatmaps: bool = True
+    enable_session_replay: bool = True
+    retention_days: int = 90
+    
+    # Machine Learning Pipeline
+    ml_model_registry: str = "mlflow"
+    enable_auto_ml: bool = True
+    model_retraining_interval: int = 24  # hours
+    feature_store_endpoint: str = ""
+    
+    # Real-time Monitoring
+    prometheus_endpoint: str = "http://localhost:9090"
+    grafana_endpoint: str = "http://localhost:3000"
+    alertmanager_endpoint: str = "http://localhost:9093"
+    enable_distributed_tracing: bool = True
+    
+    # File Storage - Enterprise
     base_dir: Path = Field(default_factory=lambda: Path(__file__).parent.parent.parent)
-    data_dir: Path = Field(default_factory=lambda: Path("data"))
-    log_dir: Path = Field(default_factory=lambda: Path("logs"))
-    reports_dir: Path = Field(default_factory=lambda: Path("reports"))
-    artifacts_dir: Path = Field(default_factory=lambda: Path("artifacts"))
-    temp_dir: Path = Field(default_factory=lambda: Path("temp"))
+    test_data_dir: Path = Field(default_factory=lambda: Path("data/test_data"))
+    ml_models_dir: Path = Field(default_factory=lambda: Path("data/models"))
+    screenshots_dir: Path = Field(default_factory=lambda: Path("artifacts/screenshots"))
+    videos_dir: Path = Field(default_factory=lambda: Path("artifacts/videos"))
+    performance_data_dir: Path = Field(default_factory=lambda: Path("data/performance"))
     
-    # Logging Configuration
+    # Logging - Enterprise Grade
     log_level: str = "INFO"
-    log_file: str = "game_tester.log"
-    log_max_size: int = 10 * 1024 * 1024  # 10MB
-    log_backup_count: int = 5
-    log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    enable_structured_logging: bool = True
+    log_format: str = "json"
+    log_rotation_size: str = "100MB"
+    log_retention_days: int = 30
+    enable_log_shipping: bool = True
+    elasticsearch_endpoint: str = ""
     
-    # Performance Configuration
-    max_concurrent_tests: int = 10
-    test_timeout_minutes: int = 30
-    retry_attempts: int = 3
-    retry_delay_seconds: int = 5
+    # Advanced Agent Configuration
+    max_agents_per_session: int = 20
+    agent_memory_limit: str = "2GB"
+    agent_cpu_limit: float = 2.0
+    enable_agent_clustering: bool = True
+    agent_fault_tolerance: bool = True
     
-    # Agent Configuration
-    planner_agent_temperature: float = 0.8
-    ranker_agent_temperature: float = 0.5
-    executor_agent_temperature: float = 0.3
-    analyzer_agent_temperature: float = 0.4
-    orchestrator_agent_temperature: float = 0.6
+    # Specialized Agent Types
+    planner_agent_config: Dict[str, Any] = {
+        "temperature": 0.8,
+        "max_planning_depth": 10,
+        "enable_reasoning": True,
+        "memory_size": "1GB"
+    }
     
-    # Monitoring
-    metrics_enabled: bool = True
-    metrics_port: int = 9090
-    health_check_interval: int = 30
+    executor_agent_config: Dict[str, Any] = {
+        "temperature": 0.3,
+        "parallel_execution": True,
+        "max_retries": 3,
+        "timeout_seconds": 300
+    }
     
-    # Target Game Configuration
-    target_game_url: str = "https://play.ezygamers.com/"
-    game_type: str = "number_puzzle"
-    supported_languages: List[str] = ["English", "हिन्दी", "ಕನ್ನಡ", "தமிழ்", "తెలుగు"]
+    analyzer_agent_config: Dict[str, Any] = {
+        "temperature": 0.4,
+        "enable_ml_analysis": True,
+        "confidence_threshold": 0.85,
+        "deep_analysis": True
+    }
+    
+    # Game-Specific Configuration
+    unity_integration: bool = True
+    unreal_integration: bool = True
+    godot_integration: bool = True
+    custom_engine_support: bool = True
+    
+    # VR/AR Testing
+    enable_vr_testing: bool = True
+    vr_headsets: List[str] = ["Quest 2", "Quest 3", "PICO 4", "Valve Index"]
+    ar_devices: List[str] = ["HoloLens 2", "Magic Leap 2", "ARCore", "ARKit"]
+    
+    # Blockchain & Web3 Gaming
+    enable_web3_testing: bool = True
+    ethereum_rpc_url: str = ""
+    polygon_rpc_url: str = ""
+    solana_rpc_url: str = ""
     
     @field_validator("secret_key", "encryption_key")
     @classmethod
-    def generate_keys_if_empty(cls, v: str) -> str:
-        """Generate secure keys if not provided"""
+    def generate_secure_keys(cls, v: str) -> str:
+        """Generate cryptographically secure keys"""
         if not v:
             import secrets
             return secrets.token_urlsafe(32)
         return v
     
-    @field_validator("data_dir", "log_dir", "reports_dir", "artifacts_dir", "temp_dir")
+    @field_validator("test_data_dir", "ml_models_dir", "screenshots_dir", "videos_dir", "performance_data_dir")
     @classmethod
     def create_directories(cls, v: Path) -> Path:
-        """Ensure directories exist"""
+        """Ensure all required directories exist"""
         v.mkdir(parents=True, exist_ok=True)
         return v
     
     @property
     def database_url(self) -> str:
-        """Construct database URL"""
+        """Construct PostgreSQL connection URL"""
         return f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
     
     @property
-    def redis_url(self) -> str:
-        """Construct Redis URL"""
-        password_part = f":{self.redis_password}@" if self.redis_password else ""
-        protocol = "rediss" if self.redis_ssl else "redis"
-        return f"{protocol}://{password_part}{self.redis_host}:{self.redis_port}/{self.redis_db}"
+    def redis_cluster_url(self) -> str:
+        """Construct Redis Cluster connection URL"""
+        nodes = ",".join(self.redis_cluster_nodes)
+        return f"redis-cluster://{nodes}"
 
 
 @lru_cache()
-def get_settings() -> Settings:
-    """Get cached settings instance"""
-    return Settings()
+def get_settings() -> AdvancedSettings:
+    """Get cached advanced settings instance"""
+    return AdvancedSettings()
