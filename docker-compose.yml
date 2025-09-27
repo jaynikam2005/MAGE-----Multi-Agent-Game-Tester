@@ -12,12 +12,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
       - ENVIRONMENT=production
-    deploy:
-      resources:
-        limits:
-          memory: 4G
-        reservations:
-          memory: 2G
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -32,8 +26,10 @@ services:
       - "3000:3000"
     environment:
       - REACT_APP_API_URL=http://backend:8000
+      - NODE_ENV=production
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
   monitoring:
     image: grafana/grafana:latest
@@ -44,7 +40,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 networks:
   default:
