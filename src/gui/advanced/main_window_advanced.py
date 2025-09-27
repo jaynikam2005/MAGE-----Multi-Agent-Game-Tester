@@ -50,7 +50,7 @@ from src.gui.advanced.modern_controls import (
     ModernSlider, ModernButton, ModernProgressBar, ModernCard,
     AnimatedLabel, GlowingButton, ParticleButton
 )
-from src.gui.styles.advanced_theme import AdvancedDarkTheme, NeonTheme, CyberpunkTheme
+from src.gui.advanced.advanced_theme import AdvancedDarkTheme, NeonTheme, CyberpunkTheme
 
 
 class AdvancedMainWindow(QMainWindow):
