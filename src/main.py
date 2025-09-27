@@ -12,7 +12,7 @@ import signal
 import os
 
 from PyQt6.QtWidgets import QApplication, QStyleFactory
-from PyQt6.QtCore import QDir, qmlRegisterType
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QFontDatabase
 
 from src.core.config import Settings, get_settings
