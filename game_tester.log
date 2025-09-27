@@ -13,3 +13,18 @@
 2025-09-28 02:06:41,595 - __main__ - INFO - Shutdown complete
 2025-09-28 02:06:41,596 - src.api.server - INFO - API server stopped
 2025-09-28 02:06:41,596 - src.database.connection - INFO - Database connections closed
+2025-09-28 02:22:35,091 - src.core.logger - INFO - Logging system initialized successfully
+2025-09-28 02:22:35,092 - __main__ - INFO - Starting Multi-Agent Game Tester Pro
+2025-09-28 02:22:35,092 - src.security.encryption - INFO - Security manager initialized (minimal mode)
+2025-09-28 02:22:35,092 - __main__ - INFO - Security manager initialized successfully
+2025-09-28 02:22:35,092 - src.database.connection - INFO - Database manager initialized (minimal mode)
+2025-09-28 02:22:35,092 - __main__ - INFO - Database manager initialized successfully
+2025-09-28 02:22:35,103 - __main__ - INFO - High DPI scaling attributes not available (Qt6 default behavior)
+2025-09-28 02:22:35,131 - src.api.server - INFO - API server started (minimal mode) on port 8000
+2025-09-28 02:22:35,131 - __main__ - INFO - API server started on port 8000
+2025-09-28 02:22:35,619 - __main__ - INFO - Full GUI initialized successfully
+2025-09-28 02:24:06,749 - __main__ - INFO - Initiating graceful shutdown...
+2025-09-28 02:24:06,750 - src.security.encryption - INFO - Security manager cleanup completed
+2025-09-28 02:24:06,750 - __main__ - INFO - Shutdown complete
+2025-09-28 02:24:06,750 - src.api.server - INFO - API server stopped
+2025-09-28 02:24:06,750 - src.database.connection - INFO - Database connections closed
