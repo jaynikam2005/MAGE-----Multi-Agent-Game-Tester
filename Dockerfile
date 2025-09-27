@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Install only necessary system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update ; apt-get install -y \
     build-essential \
     curl \
     git \
@@ -24,7 +24,7 @@ RUN poetry config virtualenvs.create false \
     && poetry install --no-dev --no-interaction --no-ansi
 
 # Install additional dependencies for Playwright
-RUN apt-get update && apt-get install -y \
+RUN apt-get update ; apt-get install -y \
     libnss3 \
     libnspr4 \
     libatk1.0-0 \
