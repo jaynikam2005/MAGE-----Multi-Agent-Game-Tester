@@ -174,8 +174,14 @@ class ApplicationBootstrap:
     
     def setup_qt_application(self) -> None:
         """Setup PyQt6 application with advanced styling"""
-        QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
-        QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
+        # Fix for PyQt6 - High DPI is enabled by default in Qt6, so these attributes are deprecated
+        try:
+            # These are deprecated in Qt6 but we'll try them anyway for compatibility
+            QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
+            QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
+        except AttributeError:
+            # In PyQt6, high DPI scaling is always enabled, so we can ignore this error
+            self.logger.info("High DPI scaling attributes not available (Qt6 default behavior)")
         
         self.app = QApplication(sys.argv)
         self.app.setApplicationName("Multi-Agent Game Tester Pro")
@@ -293,87 +299,8 @@ class ApplicationBootstrap:
             self.shutdown()
 
 
-def create_minimal_config():
-    """Create a minimal config file if it doesn't exist"""
-    config_path = Path("src/core/config.py")
-    if not config_path.exists():
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(config_path, 'w') as f:
-            f.write('''"""
-Minimal Configuration Management
-"""
-
-from pathlib import Path
-from typing import Optional
-
-
-class Settings:
-    """Minimal application settings"""
-    
-    def __init__(self):
-        # Application
-        self.app_name = "Multi-Agent Game Tester Pro"
-        self.version = "1.0.0"
-        self.debug = True
-        self.environment = "development"
-        
-        # API Configuration
-        self.api_host = "127.0.0.1"
-        self.api_port = 8000
-        
-        # Logging Configuration
-        self.log_level = "INFO"
-        self.log_file = "game_tester.log"
-        
-        # Target Game Configuration
-        self.target_game_url = "https://play.ezygamers.com/"
-
-
-def get_settings() -> Settings:
-    """Get settings instance"""
-    return Settings()
-''')
-
-
-def create_minimal_logger():
-    """Create minimal logger module"""
-    logger_path = Path("src/core/logger.py")
-    if not logger_path.exists():
-        logger_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(logger_path, 'w') as f:
-            f.write('''"""
-Minimal Logging System
-"""
-
-import logging
-import sys
-
-
-def setup_logging(level: str = "INFO", log_file: str = None) -> None:
-    """Setup basic logging configuration"""
-    
-    # Configure basic logging
-    logging.basicConfig(
-        level=getattr(logging, level.upper()),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler(log_file) if log_file else logging.NullHandler()
-        ]
-    )
-    
-    logger = logging.getLogger(__name__)
-    logger.info("Logging system initialized")
-''')
-
-
 async def main() -> int:
     """Async main entry point"""
-    
-    # Create minimal modules if they don't exist
-    create_minimal_config()
-    create_minimal_logger()
-    
     bootstrap = ApplicationBootstrap()
     return await bootstrap.run()
 

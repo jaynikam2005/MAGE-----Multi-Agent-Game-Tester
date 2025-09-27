@@ -18,7 +18,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="forbid"
+        extra="ignore"  # Changed from "forbid" to "ignore" to handle extra env vars
     )
     
     # Application
@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     encryption_key: Optional[str] = Field(default=None, description="Fernet encryption key")
     use_encryption: bool = True
     
-    # OpenAI Configuration
+    # OpenAI Configuration - THIS WAS MISSING!
     openai_api_key: str = Field(default="", description="OpenAI API key")
     openai_model: str = "gpt-4-turbo-preview"
     openai_max_tokens: int = 4000
