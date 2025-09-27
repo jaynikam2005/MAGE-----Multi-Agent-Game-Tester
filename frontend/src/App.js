@@ -1,176 +1,175 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './App.css';
+import { ChakraProvider, Box, VStack, HStack, Button, Text, Input, Select, Progress, useToast, Table, Thead, Tbody, Tr, Th, Td, Badge } from '@chakra-ui/react';
 
-const API_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8000/api/v2';
 
 function App() {
-  const [sessionId, setSessionId] = useState(null);
-  const [status, setStatus] = useState('idle');
-  const [progress, setProgress] = useState(0);
-  const [report, setReport] = useState(null);
+  const [targetUrl, setTargetUrl] = useState('https://play.ezygamers.com/');
+  const [executionId, setExecutionId] = useState(null);
+  const [executionStatus, setExecutionStatus] = useState(null);
+  const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
-  // Start new test session
-  const startTesting = async () => {
-    setLoading(true);
+  const generateTestPlan = async () => {
     try {
-      const response = await axios.post(`${API_URL}/sessions/create`, {
-        game_url: 'https://play.ezygamers.com/',
-        test_count: 20,
-        top_k: 10
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/generate-plan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ target_url: targetUrl })
       });
-      
-      setSessionId(response.data.session_id);
-      setStatus('running');
-      
-      // Start polling for status
-      pollStatus(response.data.session_id);
+
+      if (!response.ok) throw new Error('Failed to generate test plan');
+
+      const data = await response.json();
+      const executionResponse = await fetch(`${API_BASE_URL}/execute-plan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ test_cases: data.test_cases })
+      });
+
+      if (!executionResponse.ok) throw new Error('Failed to start execution');
+
+      const executionData = await executionResponse.json();
+      setExecutionId(executionData.execution_id);
+      startStatusPolling(executionData.execution_id);
+
+      toast({
+        title: 'Test plan generated and execution started',
+        status: 'success',
+        duration: 3000,
+      });
     } catch (error) {
-      console.error('Failed to start testing:', error);
+      toast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
       setLoading(false);
     }
   };
 
-  // Poll session status
-  const pollStatus = async (id) => {
+  const startStatusPolling = (id) => {
     const interval = setInterval(async () => {
       try {
-        const response = await axios.get(`${API_URL}/sessions/${id}`);
-        setStatus(response.data.status);
-        setProgress(response.data.progress || 0);
-        
-        if (response.data.status === 'completed') {
+        const response = await fetch(`${API_BASE_URL}/execution-status/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const status = await response.json();
+        setExecutionStatus(status);
+
+        if (status.status === 'COMPLETED') {
           clearInterval(interval);
-          fetchReport(id);
-        } else if (response.data.status === 'failed') {
-          clearInterval(interval);
-          setLoading(false);
+          fetchReports();
         }
       } catch (error) {
-        console.error('Failed to fetch status:', error);
+        console.error('Status polling error:', error);
         clearInterval(interval);
-        setLoading(false);
       }
-    }, 2000); // Poll every 2 seconds
+    }, 5000);
   };
 
-  // Fetch final report
-  const fetchReport = async (id) => {
+  const fetchReports = async () => {
     try {
-      const response = await axios.get(`${API_URL}/sessions/${id}/report`);
-      setReport(response.data);
-      setLoading(false);
+      const response = await fetch(`${API_BASE_URL}/reports`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      setReports(data);
     } catch (error) {
-      console.error('Failed to fetch report:', error);
-      setLoading(false);
+      console.error('Error fetching reports:', error);
     }
   };
 
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Multi-Agent Game Tester</h1>
-        <p>Automated Testing for EzyGamers Number Puzzle</p>
-      </header>
-      
-      <main className="App-main">
-        {!sessionId && (
-          <div className="start-section">
-            <button 
-              onClick={startTesting} 
-              disabled={loading}
-              className="start-button"
+    <ChakraProvider>
+      <Box p={8}>
+        <VStack spacing={6} align="stretch">
+          <HStack>
+            <Input
+              value={targetUrl}
+              onChange={(e) => setTargetUrl(e.target.value)}
+              placeholder="Enter target URL"
+              flex={1}
+            />
+            <Button
+              colorScheme="blue"
+              onClick={generateTestPlan}
+              isLoading={loading}
+              loadingText="Generating..."
             >
-              Start Testing
-            </button>
-          </div>
-        )}
-        
-        {sessionId && !report && (
-          <div className="progress-section">
-            <h2>Test Session: {sessionId}</h2>
-            <p>Status: {status}</p>
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${progress}%` }}
+              Generate & Execute Tests
+            </Button>
+          </HStack>
+
+          {executionStatus && (
+            <Box borderWidth={1} borderRadius="lg" p={4}>
+              <Text fontSize="lg" mb={2}>Execution Status</Text>
+              <Progress
+                value={(executionStatus.completed_tests / executionStatus.total_tests) * 100}
+                size="lg"
+                colorScheme="green"
+                mb={2}
               />
-            </div>
-            <p>{progress}% Complete</p>
-          </div>
-        )}
-        
-        {report && (
-          <div className="report-section">
-            <h2>Test Report</h2>
-            <div className="summary">
-              <h3>Summary</h3>
-              <ul>
-                <li>Total Tests: {report.summary.total_tests}</li>
-                <li>Executed: {report.summary.executed_tests}</li>
-                <li>Passed: {report.summary.passed}</li>
-                <li>Failed: {report.summary.failed}</li>
-                <li>Success Rate: {report.summary.success_rate.toFixed(2)}%</li>
-              </ul>
-            </div>
-            
-            <div className="test-results">
-              <h3>Test Results</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Test ID</th>
-                    <th>Status</th>
-                    <th>Execution Time</th>
-                    <th>Reproducibility</th>
-                    <th>Artifacts</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.test_results.map(result => (
-                    <tr key={result.test_case_id}>
-                      <td>{result.test_case_id}</td>
-                      <td className={`status-${result.status}`}>
-                        {result.status}
-                      </td>
-                      <td>{result.execution_time.toFixed(2)}s</td>
-                      <td>{(result.reproducibility_score * 100).toFixed(0)}%</td>
-                      <td>
-                        <button onClick={() => viewArtifacts(result.artifacts)}>
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="validation">
-              <h3>Validation Results</h3>
-              <pre>{JSON.stringify(report.validation, null, 2)}</pre>
-            </div>
-            
-            <div className="recommendations">
-              <h3>Recommendations</h3>
-              <ul>
-                {report.recommendations?.map((rec, idx) => (
-                  <li key={idx}>{rec}</li>
+              <Text>{`${executionStatus.completed_tests} / ${executionStatus.total_tests} tests completed`}</Text>
+              <Badge colorScheme={executionStatus.status === 'COMPLETED' ? 'green' : 'yellow'}>
+                {executionStatus.status}
+              </Badge>
+            </Box>
+          )}
+
+          <Box>
+            <Text fontSize="xl" mb={4}>Test Reports</Text>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>ID</Th>
+                  <Th>Date</Th>
+                  <Th>Success Rate</Th>
+                  <Th>Actions</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {reports.map((report) => (
+                  <Tr key={report.id}>
+                    <Td>{report.id}</Td>
+                    <Td>{new Date(report.timestamp).toLocaleString()}</Td>
+                    <Td>
+                      {((report.successful_tests / report.total_tests) * 100).toFixed(1)}%
+                    </Td>
+                    <Td>
+                      <Button
+                        size="sm"
+                        onClick={() => window.open(`${API_BASE_URL}/reports/${report.id}`)}
+                      >
+                        View Details
+                      </Button>
+                    </Td>
+                  </Tr>
                 ))}
-              </ul>
-            </div>
-            
-            <button 
-              onClick={() => downloadReport(report)}
-              className="download-button"
-            >
-              Download Full Report
-            </button>
-          </div>
-        )}
-      </main>
-    </div>
+              </Tbody>
+            </Table>
+          </Box>
+        </VStack>
+      </Box>
+    </ChakraProvider>
   );
 }
 

@@ -1,122 +1,104 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import time
+from playwright.async_api import async_playwright
+from typing import Dict, Any, List
+import asyncio
 import json
+import base64
 from datetime import datetime
+from backend.core.architecture import TestCase, ExecutionResult
+import aiohttp
+import cv2
+import numpy as np
 
 class ExecutorAgent:
-    def __init__(self, agent_id: str, headless: bool = False):
-        self.agent_id = agent_id
-        self.driver = self._setup_driver(headless)
-        self.artifacts = {}
-        
-    def _setup_driver(self, headless: bool) -> webdriver.Chrome:
-        """Setup Selenium WebDriver with security configurations"""
-        options = Options()
-        
-        # Security configurations
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-blink-features=AutomationControlled')
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_experimental_option('useAutomationExtension', False)
-        
-        if headless:
-            options.add_argument('--headless')
-        
-        # Enable logging for network and console
-        options.set_capability('goog:loggingPrefs', {
-            'browser': 'ALL',
-            'performance': 'ALL'
-        })
-        
-        return webdriver.Chrome(options=options)
-    
-    def execute_test(self, test_case: TestCase) -> TestResult:
-        """Execute a single test case"""
-        start_time = time.time()
-        artifacts = {
-            'screenshots': [],
-            'dom_snapshots': [],
-            'console_logs': [],
-            'network_logs': []
-        }
-        
+    def __init__(self):
+        self.browser = None
+        self.context = None
+        self.page = None
+
+    async def setup(self):
+        playwright = await async_playwright().start()
+        self.browser = await playwright.chromium.launch()
+        self.context = await self.browser.new_context(
+            record_video_dir="artifacts/videos",
+            viewport={"width": 1920, "height": 1080}
+        )
+        self.page = await self.context.new_page()
+        await self.context.tracing.start(screenshots=True, snapshots=True)
+
+    async def execute_test_case(self, test_case: TestCase) -> ExecutionResult:
+        start_time = datetime.now()
+        artifacts = {}
         try:
-            # Navigate to game
-            self.driver.get("https://play.ezygamers.com/")
-            time.sleep(2)  # Wait for initial load
+            await self.setup()
+            for step in test_case.steps:
+                await self._execute_step(step)
+                artifact = await self._capture_artifacts()
+                artifacts.update(artifact)
             
-            # Execute test steps
-            for i, step in enumerate(test_case.steps):
-                step_artifacts = self._execute_step(step, i)
-                self._collect_artifacts(artifacts, step_artifacts, i)
-            
-            # Capture final state
-            final_artifacts = self._capture_final_state()
-            artifacts.update(final_artifacts)
-            
-            status = "passed"
+            success = True
+            error_message = None
+            stack_trace = None
             
         except Exception as e:
-            status = "failed"
-            artifacts['error'] = str(e)
-            self._capture_error_state(artifacts)
+            success = False
+            error_message = str(e)
+            stack_trace = e.__traceback__.format()
+            
+        finally:
+            await self._cleanup()
+            
+        execution_time = (datetime.now() - start_time).total_seconds()
         
-        execution_time = time.time() - start_time
-        
-        return TestResult(
+        return ExecutionResult(
             test_case_id=test_case.id,
-            status=status,
-            artifacts=artifacts,
-            validation_results={},
+            success=success,
             execution_time=execution_time,
-            reproducibility_score=0.0
+            artifacts=artifacts,
+            error_message=error_message,
+            stack_trace=stack_trace,
+            metrics=await self._collect_metrics()
         )
-    
-    def _execute_step(self, step: dict, step_index: int) -> dict:
-        """Execute a single test step"""
-        action = step.get('action')
-        target = step.get('target')
-        value = step.get('value')
-        
-        step_artifacts = {}
-        
-        if action == 'click':
-            element = self.driver.find_element(By.CSS_SELECTOR, target)
-            element.click()
-        elif action == 'input':
-            element = self.driver.find_element(By.CSS_SELECTOR, target)
-            element.clear()
-            element.send_keys(value)
-        elif action == 'wait':
-            time.sleep(float(value))
-        elif action == 'verify':
-            # Verification logic
-            pass
-        
-        # Capture artifacts after step
-        step_artifacts['screenshot'] = self._capture_screenshot(f"step_{step_index}")
-        step_artifacts['dom'] = self._capture_dom()
-        step_artifacts['console'] = self._capture_console_logs()
-        
-        return step_artifacts
-    
-    def _capture_screenshot(self, name: str) -> str:
-        """Capture and save screenshot"""
+
+    async def _execute_step(self, step: Dict[str, Any]):
+        action = step["action"]
+        if action == "click":
+            await self.page.click(step["selector"])
+        elif action == "type":
+            await self.page.fill(step["selector"], step["value"])
+        elif action == "wait":
+            await self.page.wait_for_selector(step["selector"])
+        elif action == "navigate":
+            await self.page.goto(step["url"])
+        await asyncio.sleep(0.5)
+
+    async def _capture_artifacts(self) -> Dict[str, str]:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"artifacts/screenshots/{self.agent_id}_{name}_{timestamp}.png"
-        self.driver.save_screenshot(filename)
-        return filename
-    
-    def _capture_dom(self) -> str:
-        """Capture DOM snapshot"""
-        return self.driver.page_source
-    
-    def _capture_console_logs(self) -> List[dict]:
-        """Capture browser console logs"""
-        logs = self.driver.get_log('browser')
-        return logs
+        artifacts = {}
+        
+        screenshot = await self.page.screenshot(type="jpeg", quality=80)
+        artifacts[f"screenshot_{timestamp}"] = base64.b64encode(screenshot).decode()
+        
+        html = await self.page.content()
+        artifacts[f"dom_{timestamp}"] = html
+        
+        console_logs = await self.page.evaluate("() => console.logs")
+        artifacts[f"console_{timestamp}"] = json.dumps(console_logs)
+        
+        return artifacts
+
+    async def _collect_metrics(self) -> Dict[str, float]:
+        metrics = await self.page.evaluate("""
+        () => ({
+            loadTime: performance.timing.loadEventEnd - performance.timing.navigationStart,
+            domComplete: performance.timing.domComplete - performance.timing.domLoading,
+            firstPaint: performance.getEntriesByType('paint')[0].startTime
+        })
+        """)
+        return metrics
+
+    async def _cleanup(self):
+        if self.context:
+            await self.context.tracing.stop(path="artifacts/trace.zip")
+            await self.context.close()
+        if self.browser:
+            await self.browser.close()

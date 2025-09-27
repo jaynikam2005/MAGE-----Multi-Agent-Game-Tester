@@ -1,47 +1,94 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Dict
+from typing import List, Dict, Any
 import asyncio
+import uuid
+from datetime import datetime
+from backend.core.architecture import TestCase, TestReport, ExecutionResult, TestStatus
+from agents.executor_agent import ExecutorAgent
+from agents.analyzer_agent import AnalyzerAgent
 
 class OrchestratorAgent:
-    def __init__(self, num_executors: int = 3):
-        self.num_executors = num_executors
-        self.executors = [
-            ExecutorAgent(f"executor_{i}", headless=True) 
-            for i in range(num_executors)
-        ]
+    def __init__(self):
+        self.executions: Dict[str, Dict[str, Any]] = {}
+        self.reports: Dict[str, TestReport] = {}
+        self.executor_pool: List[ExecutorAgent] = []
+        self.analyzer = AnalyzerAgent()
+        self.max_concurrent_tests = 3
+        self.execution_semaphore = asyncio.Semaphore(self.max_concurrent_tests)
+
+    async def schedule_execution(self, test_cases: List[TestCase]) -> str:
+        execution_id = str(uuid.uuid4())
+        self.executions[execution_id] = {
+            "test_cases": test_cases,
+            "status": TestStatus.PENDING,
+            "results": [],
+            "start_time": datetime.now()
+        }
         
-    def execute_test_suite(self, test_cases: List[TestCase]) -> List[TestResult]:
-        """Execute multiple test cases in parallel"""
-        results = []
+        asyncio.create_task(self._execute_test_batch(execution_id))
+        return execution_id
+
+    async def _execute_test_batch(self, execution_id: str):
+        execution = self.executions[execution_id]
+        execution["status"] = TestStatus.RUNNING
         
-        with ThreadPoolExecutor(max_workers=self.num_executors) as executor:
-            # Submit test cases to executors
-            future_to_test = {
-                executor.submit(self._execute_with_retry, test_case, exec_agent): test_case
-                for test_case, exec_agent in zip(test_cases, self._round_robin_executors(test_cases))
-            }
+        tasks = []
+        for test_case in execution["test_cases"]:
+            task = asyncio.create_task(self._execute_single_test(test_case))
+            tasks.append(task)
+        
+        results = await asyncio.gather(*tasks)
+        execution["results"] = results
+        execution["status"] = TestStatus.COMPLETED
+        
+        report = await self._generate_report(execution_id)
+        self.reports[report.id] = report
+
+    async def _execute_single_test(self, test_case: TestCase) -> ExecutionResult:
+        async with self.execution_semaphore:
+            executor = ExecutorAgent()
+            result = await executor.execute_test_case(test_case)
+            validation = await self.analyzer.validate_test_result(result)
+            result.validation_results = validation
+            return result
+
+    async def get_execution_status(self, execution_id: str) -> Dict[str, Any]:
+        if execution_id not in self.executions:
+            raise KeyError(f"Execution {execution_id} not found")
             
-            # Collect results
-            for future in as_completed(future_to_test):
-                test_case = future_to_test[future]
-                try:
-                    result = future.result(timeout=300)  # 5 min timeout
-                    results.append(result)
-                except Exception as e:
-                    print(f"Test {test_case.id} failed: {e}")
-                    results.append(self._create_error_result(test_case, str(e)))
+        execution = self.executions[execution_id]
+        return {
+            "status": execution["status"].value,
+            "completed_tests": len(execution["results"]),
+            "total_tests": len(execution["test_cases"]),
+            "start_time": execution["start_time"].isoformat()
+        }
+
+    async def get_reports(self, limit: int = 10) -> List[TestReport]:
+        reports = list(self.reports.values())
+        reports.sort(key=lambda x: x.timestamp, reverse=True)
+        return reports[:limit]
+
+    async def get_report(self, report_id: str) -> TestReport:
+        return self.reports.get(report_id)
+
+    async def _generate_report(self, execution_id: str) -> TestReport:
+        execution = self.executions[execution_id]
+        results = execution["results"]
         
-        return results
-    
-    def _execute_with_retry(self, test_case: TestCase, executor: ExecutorAgent, max_retries: int = 2):
-        """Execute test with retry logic"""
-        for attempt in range(max_retries + 1):
-            try:
-                result = executor.execute_test(test_case)
-                if result.status == "passed":
-                    return result
-            except Exception as e:
-                if attempt == max_retries:
-                    raise e
-                time.sleep(2 ** attempt)  # Exponential backoff
-        return result
+        successful_tests = sum(1 for r in results if r.success)
+        failed_tests = len(results) - successful_tests
+        
+        execution_time = (datetime.now() - execution["start_time"]).total_seconds()
+        
+        validation_summary = await self.analyzer.generate_validation_summary(results)
+        
+        return TestReport(
+            total_tests=len(results),
+            successful_tests=successful_tests,
+            failed_tests=failed_tests,
+            execution_time=execution_time,
+            validation_summary=validation_summary,
+            test_results=results,
+            validation_results=[r.validation_results for r in results],
+            artifacts_location=f"artifacts/{execution_id}"
+        )
