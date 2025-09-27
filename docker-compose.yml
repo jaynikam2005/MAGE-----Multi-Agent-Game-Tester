@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   backend:
     build: 
@@ -12,11 +14,14 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
       - ENVIRONMENT=production
+      - DATABASE_URL=${DATABASE_URL}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - mage-network
 
   frontend:
     build:
@@ -27,8 +32,14 @@ services:
     environment:
       - NODE_ENV=production
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
+    networks:
+      - mage-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   monitoring:
     image: grafana/grafana:latest
@@ -39,12 +50,10 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
+    networks:
+      - mage-network
 
 networks:
-  default:
+  mage-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16

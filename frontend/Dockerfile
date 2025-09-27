@@ -7,10 +7,18 @@ RUN apk add --no-cache python3 make g++ git
 
 # Copy package files
 COPY package*.json ./
+COPY .npmrc ./
 
-# Clear npm cache and install dependencies
-RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --no-audit --no-fund --network-timeout=100000
+# Install dependencies with optimizations
+RUN npm config set fetch-retry-maxtimeout 600000 \
+    && npm config set fetch-retry-mintimeout 100000 \
+    && npm cache clean --force \
+    && npm install --legacy-peer-deps \
+        --prefer-offline \
+        --no-audit \
+        --no-fund \
+        --max-old-space-size=4096 \
+        --network-timeout=600000
 
 # Copy source
 COPY . .
