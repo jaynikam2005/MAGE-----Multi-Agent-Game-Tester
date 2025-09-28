@@ -1,4 +1,4 @@
-﻿"""
+"""
 Advanced Configuration Management
 """
 
@@ -84,6 +84,24 @@ class AdvancedSettings(BaseSettings):
     # Logging Configuration
     log_level: str = "INFO"
     log_file: str = "game_tester.log"
+    
+    # Agent Configuration
+    max_agents_per_session: int = 10
+    planner_agent_config: Dict[str, Any] = Field(default_factory=lambda: {})
+    executor_agent_config: Dict[str, Any] = Field(default_factory=lambda: {
+        "browser_headless": False,
+        "screenshot_dir": "data/screenshots",
+        "artifact_dir": "data/artifacts",
+        "timeout": 30,
+        "retry_count": 3
+    })
+    analyzer_agent_config: Dict[str, Any] = Field(default_factory=lambda: {})
+    
+    # Browser Configuration
+    browser_headless: bool = False
+    browser_type: str = "chromium"
+    browser_viewport_width: int = 1920
+    browser_viewport_height: int = 1080
     
     # Game Testing Configuration
     supported_genres: List[GameGenre] = [GameGenre.PUZZLE, GameGenre.ACTION]

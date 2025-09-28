@@ -1,4 +1,4 @@
-﻿"""
+"""
 MAGE - Multi-Agent Game Tester Enterprise
 Complete Advanced Main Entry Point with Full Functionality
 Version: 2.0.0 Enterprise Edition

@@ -417,17 +417,34 @@ class ReportGenerator:
             return {}
         
         total_tests = len(test_results)
-        successful_tests = sum(1 for r in test_results if r.success)
+        # Handle both object and dictionary test results
+        successful_tests = sum(1 for r in test_results if isinstance(r, dict) and r.get("status") == "passed" or (not isinstance(r, dict) and getattr(r, "success", False)))
         success_rate = (successful_tests / total_tests) * 100 if total_tests > 0 else 0
         
-        avg_score = sum(r.score for r in test_results) / total_tests if total_tests > 0 else 0
-        avg_duration = sum(r.duration_ms for r in test_results) / total_tests if total_tests > 0 else 0
+        # Get scores with fallback for both dict and object types
+        scores = []
+        durations = []
+        for r in test_results:
+            if isinstance(r, dict):
+                scores.append(r.get("score", 0))
+                durations.append(r.get("duration_ms", 0))
+            else:
+                scores.append(getattr(r, "score", 0))
+                durations.append(getattr(r, "duration_ms", 0))
+                
+        avg_score = sum(scores) / total_tests if total_tests > 0 else 0
+        avg_duration = sum(durations) / total_tests if total_tests > 0 else 0
         
         # Performance summary
         avg_performance_score = avg_score if test_results else 0
         
         # Security summary  
-        security_score = security_data[0].security_score if security_data else 85.0
+        security_score = 85.0  # Default value
+        if security_data:
+            if isinstance(security_data[0], dict):
+                security_score = security_data[0].get("security_score", 85.0)
+            else:
+                security_score = getattr(security_data[0], "security_score", 85.0)
         
         return {
             "total_tests": total_tests,
@@ -444,9 +461,25 @@ class ReportGenerator:
         if not performance_data:
             return {}
         
-        cpu_values = [p.cpu_usage for p in performance_data if hasattr(p, 'cpu_usage')]
-        memory_values = [p.memory_usage for p in performance_data if hasattr(p, 'memory_usage')]
-        response_values = [p.response_time_ms for p in performance_data if hasattr(p, 'response_time_ms')]
+        cpu_values = []
+        memory_values = []
+        response_values = []
+        
+        for p in performance_data:
+            if isinstance(p, dict):
+                if 'cpu_usage' in p:
+                    cpu_values.append(p['cpu_usage'])
+                if 'memory_usage' in p:
+                    memory_values.append(p['memory_usage'])
+                if 'response_time_ms' in p:
+                    response_values.append(p['response_time_ms'])
+            else:
+                if hasattr(p, 'cpu_usage'):
+                    cpu_values.append(p.cpu_usage)
+                if hasattr(p, 'memory_usage'):
+                    memory_values.append(p.memory_usage)
+                if hasattr(p, 'response_time_ms'):
+                    response_values.append(p.response_time_ms)
         
         avg_cpu = sum(cpu_values) / len(cpu_values) if cpu_values else 0
         avg_memory = sum(memory_values) / len(memory_values) if memory_values else 0
@@ -481,37 +514,71 @@ class ReportGenerator:
             }
         
         latest_scan = security_data[-1]
-        return {
-            "security_score": latest_scan.security_score,
-            "threat_level": latest_scan.threat_level,
-            "vulnerabilities_count": latest_scan.vulnerabilities_found,
-            "last_scan": latest_scan.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        }
+        if isinstance(latest_scan, dict):
+            return {
+                "security_score": latest_scan.get("security_score", 85.0),
+                "threat_level": latest_scan.get("threat_level", "LOW"),
+                "vulnerabilities_count": latest_scan.get("vulnerabilities_found", 0),
+                "last_scan": latest_scan.get("timestamp", datetime.now()).strftime("%Y-%m-%d %H:%M:%S") if isinstance(latest_scan.get("timestamp"), datetime) else str(latest_scan.get("timestamp", "Never"))
+            }
+        else:
+            return {
+                "security_score": getattr(latest_scan, "security_score", 85.0),
+                "threat_level": getattr(latest_scan, "threat_level", "LOW"),
+                "vulnerabilities_count": getattr(latest_scan, "vulnerabilities_found", 0),
+                "last_scan": getattr(latest_scan, "timestamp", datetime.now()).strftime("%Y-%m-%d %H:%M:%S") if isinstance(getattr(latest_scan, "timestamp", None), datetime) else str(getattr(latest_scan, "timestamp", "Never"))
+            }
     
     def _generate_recommendations(self, test_results, performance_data, security_data) -> List[str]:
         """Generate actionable recommendations"""
         recommendations = []
         
         if test_results:
-            success_rate = sum(1 for r in test_results if r.success) / len(test_results) * 100
+            success_count = sum(1 for r in test_results if 
+                              (isinstance(r, dict) and r.get("status") == "passed") or 
+                              (not isinstance(r, dict) and getattr(r, "success", False)))
+            success_rate = (success_count / len(test_results)) * 100
             if success_rate < 90:
                 recommendations.append("Improve test success rate by addressing failing test cases")
             
-            avg_score = sum(r.score for r in test_results) / len(test_results)
+            scores = []
+            for r in test_results:
+                if isinstance(r, dict):
+                    scores.append(r.get("score", 0))
+                else:
+                    scores.append(getattr(r, "score", 0))
+            avg_score = sum(scores) / len(test_results) if scores else 0
             if avg_score < 80:
                 recommendations.append("Focus on improving overall test scores through optimization")
         
         if performance_data:
-            cpu_values = [p.cpu_usage for p in performance_data if hasattr(p, 'cpu_usage')]
+            cpu_values = []
+            for p in performance_data:
+                if isinstance(p, dict):
+                    if 'cpu_usage' in p:
+                        cpu_values.append(p['cpu_usage'])
+                else:
+                    if hasattr(p, 'cpu_usage'):
+                        cpu_values.append(p.cpu_usage)
             if cpu_values and sum(cpu_values) / len(cpu_values) > 80:
                 recommendations.append("Consider CPU optimization - high average CPU usage detected")
         
         if security_data:
             latest_scan = security_data[-1]
-            if latest_scan.security_score < 80:
+            security_score = 0
+            vulnerabilities_count = 0
+            
+            if isinstance(latest_scan, dict):
+                security_score = latest_scan.get("security_score", 85.0)
+                vulnerabilities_count = latest_scan.get("vulnerabilities_found", 0)
+            else:
+                security_score = getattr(latest_scan, "security_score", 85.0)
+                vulnerabilities_count = getattr(latest_scan, "vulnerabilities_found", 0)
+                
+            if security_score < 80:
                 recommendations.append("Address security vulnerabilities to improve security score")
-            if latest_scan.vulnerabilities_found > 0:
-                recommendations.append(f"Fix {latest_scan.vulnerabilities_found} security vulnerabilities found")
+            if vulnerabilities_count > 0:
+                recommendations.append(f"Fix {vulnerabilities_count} security vulnerabilities found")
         
         # General recommendations
         recommendations.extend([
@@ -524,17 +591,32 @@ class ReportGenerator:
     
     def _serialize_result(self, result) -> Dict[str, Any]:
         """Serialize test result for report"""
-        return {
-            "test_id": result.test_id,
-            "test_type": result.test_type,
-            "status": result.status,
-            "success": result.success,
-            "score": result.score,
-            "duration_ms": result.duration_ms,
-            "start_time": result.start_time.isoformat(),
-            "end_time": result.end_time.isoformat(),
-            "details": result.details
-        }
+        if isinstance(result, dict):
+            # Already serialized, ensure required fields
+            return {
+                "test_id": result.get("test_id", "unknown"),
+                "test_type": result.get("test_type", "unknown"),
+                "status": result.get("status", "unknown"),
+                "success": result.get("status", "failed") == "passed",
+                "score": result.get("score", 0.0),
+                "duration_ms": result.get("execution_time", 0) * 1000 if "execution_time" in result else result.get("duration_ms", 0),
+                "start_time": datetime.now().isoformat(),
+                "end_time": datetime.now().isoformat(),
+                "details": result.get("result_details", {})
+            }
+        else:
+            # Assume object
+            return {
+                "test_id": getattr(result, "test_id", "unknown"),
+                "test_type": getattr(result, "test_type", "unknown"),
+                "status": getattr(result, "status", "unknown"),
+                "success": getattr(result, "success", False),
+                "score": getattr(result, "score", 0.0),
+                "duration_ms": getattr(result, "duration_ms", 0),
+                "start_time": getattr(result, "start_time", datetime.now()).isoformat(),
+                "end_time": getattr(result, "end_time", datetime.now()).isoformat(),
+                "details": getattr(result, "details", {})
+            }
     
     def get_available_reports(self) -> List[Dict[str, str]]:
         """Get list of available reports"""

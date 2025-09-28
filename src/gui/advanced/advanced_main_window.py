@@ -1,4 +1,4 @@
-﻿"""
+"""
 Complete Advanced Main Window
 Full-Featured Gaming Industry Testing Application
 """

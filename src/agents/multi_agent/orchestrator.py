@@ -13,13 +13,13 @@ import structlog
 
 from src.core.config import get_settings, TestingMode, GameGenre
 from src.agents.specialized.planner_agent import PlannerAgent
-from src.agents.specialized.ranker_agent import RankerAgent
+from src.agents.ranker.ranker_agent import RankerAgent  # Updated import path
 from src.agents.specialized.executor_agent import ExecutorAgent
 from src.agents.specialized.analyzer_agent import AnalyzerAgent
 from src.agents.specialized.performance_agent import PerformanceAgent
 from src.agents.specialized.security_agent import SecurityAgent
 from src.agents.specialized.graphics_agent import GraphicsAgent
-from src.agents.specialized.ai_behavior_agent import AIBehaviorAgent
+from src.agents.specialized.ai_behaviour_agent import AIBehaviorAgent  # Fixed typo in filename
 
 
 class AgentStatus(str, Enum):
@@ -74,7 +74,7 @@ class TestSession:
     total_tests: int
 
 
-class AdvancedMultiAgentOrchestrator:
+class OrchestratorAgent:
     """Enterprise multi-agent orchestrator for game testing"""
     
     def __init__(self):
@@ -559,6 +559,70 @@ class AdvancedMultiAgentOrchestrator:
                 self.logger.error(f"Metrics collection failed: {e}")
                 await asyncio.sleep(300)
     
+    async def generate_test_plan(self, num_tests: int) -> List[Dict[str, Any]]:
+        """Generate a test plan with the specified number of tests"""
+        test_plan = {
+            "test_cases": []
+        }
+        
+        # Get available planner agents
+        planner_agents = [agent for agent_id, agent in self.agents.items() 
+                         if isinstance(agent, PlannerAgent)]
+        
+        if not planner_agents:
+            raise RuntimeError("No planner agents available")
+        
+        # Use the first available planner
+        planner = planner_agents[0]
+        test_cases = await planner.generate_test_plan({
+            "target_url": self.settings.target_game_url,
+            "game_genre": GameGenre.PUZZLE.value,
+            "test_count": num_tests,
+            "testing_modes": ["performance", "security", "graphics"]
+        })
+        
+        return test_cases["test_cases"] if isinstance(test_cases, dict) and "test_cases" in test_cases else test_cases
+    
+    async def execute_tests(self, test_ids: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        """Execute specified tests or all pending tests"""
+        # Get available executor agents
+        executor_agents = [agent for agent_id, agent in self.agents.items() 
+                         if isinstance(agent, ExecutorAgent)]
+        
+        if not executor_agents:
+            raise RuntimeError("No executor agents available")
+        
+        # If no specific test IDs provided, execute all pending tests
+        if not test_ids:
+            # In a real implementation, we would get pending tests from a queue or database
+            test_ids = ["test_1", "test_2", "test_3"]  # Example test IDs
+        
+        # Create a test batch for execution
+        test_batch = [{"id": test_id} for test_id in test_ids]
+        
+        # Execute tests using available agents
+        results = await self._execute_testing_phase(
+            TestSession(
+                session_id="temp_session",
+                user_id="system",
+                target_url=self.settings.target_game_url,
+                game_genre=GameGenre.PUZZLE,
+                testing_modes=[TestingMode.PERFORMANCE],
+                configuration={},
+                phase=TestPhase.EXECUTION,
+                start_time=time.time(),
+                estimated_duration=len(test_ids) * 30,
+                progress=0.0,
+                active_agents=[],
+                completed_tests=0,
+                failed_tests=0,
+                total_tests=len(test_ids)
+            ),
+            test_batch
+        )
+        
+        return results
+
     def get_orchestrator_status(self) -> Dict[str, Any]:
         """Get current orchestrator status and metrics"""
         return {
