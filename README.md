@@ -1,35 +1,53 @@
 # 🎮 MAGE: Multi-Agent Game Evolution Tester
+### *Because Manual Testing is So 2020* 🚀
 
 <div align="center">
 
 ```
-███╗   ███╗ █████╗  ██████╗ ███████╗
-████╗ ████║██╔══██╗██╔════╝ ██╔════╝
-██╔████╔██║███████║██║  ███╗█████╗  
-██║╚██╔╝██║██╔══██║██║   ██║██╔══╝  
-██║ ╚═╝ ██║██║  ██║╚██████╔╝███████╗
-╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+██████╗ ██╗      █████╗ ██╗   ██╗███████╗██████╗     ████████╗██╗    ██╗ ██████╗ 
+██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝██╔════╝██╔══██╗    ╚══██╔══╝██║    ██║██╔═══██╗
+██████╔╝██║     ███████║ ╚████╔╝ █████╗  ██████╔╝       ██║   ██║ █╗ ██║██║   ██║
+██╔═══╝ ██║     ██╔══██║  ╚██╔╝  ██╔══╝  ██╔══██╗       ██║   ██║███╗██║██║   ██║
+██║     ███████╗██║  ██║   ██║   ███████╗██║  ██║       ██║   ╚███╔███╔╝╚██████╔╝
+╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝       ╚═╝    ╚══╝╚══╝  ╚═════╝ 
+
+███╗   ███╗ █████╗  ██████╗ ███████╗    ███████╗███╗   ██╗████████╗███████╗██████╗ ██████╗ ██████╗ ██╗███████╗███████╗
+████╗ ████║██╔══██╗██╔════╝ ██╔════╝    ██╔════╝████╗  ██║╚══██╔══╝██╔════╝██╔══██╗██╔══██╗██╔══██╗██║██╔════╝██╔════╝
+██╔████╔██║███████║██║  ███╗█████╗      █████╗  ██╔██╗ ██║   ██║   █████╗  ██████╔╝██████╔╝██████╔╝██║███████╗█████╗  
+██║╚██╔╝██║██╔══██║██║   ██║██╔══╝      ██╔══╝  ██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗██╔═══╝ ██╔══██╗██║╚════██║██╔══╝  
+██║ ╚═╝ ██║██║  ██║╚██████╔╝███████╗    ███████╗██║ ╚████║   ██║   ███████╗██║  ██║██║     ██║  ██║██║███████║███████╗
+╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝
 ```
 
-[![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg?style=for-the-badge)](https://fastapi.tiangolo.com/)
-[![LangChain](https://img.shields.io/badge/LangChain-AI-orange.svg?style=for-the-badge)](https://www.langchain.com/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/status-Production Ready-brightgreen.svg?style=for-the-badge)](https://github.com/jaynikam2005/MAGE---Multi-Agent-Game-Tester)
+[![Python Version](https://img.shields.io/badge/python-3.12+-crimson.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![PyQt6](https://img.shields.io/badge/PyQt6-Desktop-neon.svg?style=for-the-badge&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/)
+[![LangChain](https://img.shields.io/badge/LangChain-AI_Powered-orange.svg?style=for-the-badge&logo=openai&logoColor=white)](https://www.langchain.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Playwright](https://img.shields.io/badge/Playwright-Browser_Automation-blue.svg?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![License](https://img.shields.io/badge/license-MIT-purple.svg?style=for-the-badge)](LICENSE)
+[![Status](https://img.shields.io/badge/status-CYBERPUNK_READY-brightgreen.svg?style=for-the-badge)](https://github.com/jaynikam2005/MAGE---Multi-Agent-Game-Tester)
 
-**🚀 Next-Generation AI-Powered Game Testing Platform**
-*Revolutionizing game QA through intelligent multi-agent automation*
+**🤖 WELCOME TO THE FUTURE OF GAME TESTING 🤖**
+*Where AI Agents do the heavy lifting while you sip coffee and watch the magic happen*
+
+### 💀 WARNING: This isn't your grandma's testing framework 💀
+*MAGE is a military-grade, enterprise-level, AI-powered testing juggernaut that makes bugs cry*
 
 </div>
 
 ---
 
-## 🌟 Overview
+## 🌟 What the Hell is MAGE?
 
-**MAGE** is a cutting-edge, production-grade testing platform that leverages artificial intelligence and multi-agent systems to automate comprehensive testing of web-based games. Built for the future of game development, MAGE combines advanced AI planning with precision execution to deliver unparalleled testing capabilities.
+**MAGE** (Multi-Agent Game Evolution Tester) is what happens when you give a bunch of AI agents espresso, lock them in a room with web games, and tell them to break everything systematically. It's not just a testing framework - it's a digital army of specialized AI agents that hunt bugs like they're playing Call of Duty.
 
-### 🎯 Mission Statement
-To transform game testing from a manual, time-intensive process into an intelligent, automated system that ensures game quality while accelerating development cycles.
+### 🎯 Why MAGE Exists
+Because clicking buttons manually is for peasants. We live in 2025, where your car drives itself, your coffee maker is smarter than some people, and your testing framework should at least be able to outsmart a game developer's "this will never break" code.
+
+### 🚨 Reality Check
+- **Manual Testing**: 1999 called, they want their methodology back
+- **Automated Scripts**: Cute, but about as flexible as a Nokia 3310
+- **MAGE**: *Chef's kiss* - AI that actually understands what it's testing
 
 ---
 
@@ -67,11 +85,11 @@ To transform game testing from a manual, time-intensive process into an intellig
 - **Performance Analysis**: Comprehensive metrics collection and analysis
 - **Reproducibility Testing**: Ensures consistent results across multiple runs
 
-### 🎨 **Advanced UI/UX Experience**
+### 🎨 **Advanced Desktop Experience**
 
 #### **Modern Interface Design**
-- **FastAPI Backend**: Lightning-fast API responses with automatic documentation
-- **Reactive Frontend**: Real-time updates and responsive design
+- **Native Desktop App**: PyQt6-powered cross-platform application
+- **Real-time Updates**: Live monitoring and responsive UI components
 - **Dark/Light Themes**: Customizable interface with gaming aesthetics
 - **Interactive Dashboards**: Rich visualizations and real-time monitoring
 
@@ -102,10 +120,10 @@ To transform game testing from a manual, time-intensive process into an intellig
 
 ### **Core Technologies**
 ```yaml
-Backend Framework:
-  - FastAPI: Ultra-fast Python web framework
-  - Pydantic: Data validation and settings management
-  - SQLAlchemy: Advanced ORM with async support
+Desktop Framework:
+  - PyQt6: Modern cross-platform GUI framework
+  - Python 3.11+: Latest Python with enhanced performance
+  - SQLite: Embedded database with encryption support
   
 AI & Automation:
   - LangChain: Advanced language model integration
@@ -114,23 +132,23 @@ AI & Automation:
   - AsyncIO: High-performance async operations
 
 Security & Performance:
-  - JWT Authentication: Secure token-based auth
   - AES-256 Encryption: Military-grade data protection
-  - Redis: High-performance caching and sessions
-  - PostgreSQL: Enterprise-grade database
+  - Secure credential storage
+  - Local data processing
+  - Multi-threaded execution
 ```
 
 ### **System Architecture**
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend UI   │◄──►│   FastAPI API   │◄──►│ Multi-Agent AI  │
-│   React + TS    │    │   Backend       │    │    System       │
+│   PyQt6 GUI    │◄──►│   Core Engine   │◄──►│ Multi-Agent AI  │
+│   Desktop UI    │    │   & Logic       │    │    System       │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
           │                       │                       │
           ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  User Interface │    │   API Gateway   │    │  Agent Manager  │
-│   Components    │    │   & Security    │    │ & Orchestrator  │
+│  User Interface │    │  Game Engine &  │    │  Agent Manager  │
+│   Components    │    │   Automation    │    │ & Orchestrator  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -217,9 +235,9 @@ MAGE---Multi-Agent-Game-Tester/
 ```bash
 # Required Software Stack
 ✅ Python 3.11+ (Latest recommended)
-✅ Node.js 18+ LTS
 ✅ Git (Latest version)
-✅ PostgreSQL 14+ (Optional for production)
+✅ PyQt6 (Included in requirements)
+✅ SQLite (Built-in with Python)
 ```
 
 ### **Installation & Setup**
@@ -240,7 +258,7 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-#### **2. Backend Configuration**
+#### **2. Application Configuration**
 ```bash
 # Install Python dependencies
 pip install -r requirements.txt
@@ -249,28 +267,16 @@ pip install -r requirements.txt
 cp .env.template .env
 # Edit .env with your specific configuration
 
-# Initialize database (if using PostgreSQL)
+# Initialize local database
 python scripts/init_db.py
 
-# Install Playwright browsers
+# Install Playwright browsers for web game testing
 playwright install chromium --with-deps
 ```
 
-#### **3. Frontend Setup**
+#### **3. Launch Application**
 ```bash
-# Navigate to frontend directory
-cd frontend
-
-# Install JavaScript dependencies
-npm install
-
-# Build frontend assets
-npm run build
-```
-
-#### **4. Launch Application**
-```bash
-# Start the application
+# Start the desktop application
 python src/main.py
 
 # Or use the launcher script
@@ -357,8 +363,8 @@ Memory Efficiency: < 500MB average usage
 # Run comprehensive test suite
 pytest tests/ -v --cov=src --cov-report=html
 
-# Frontend testing
-cd frontend && npm test
+# GUI testing
+python tests/test_gui/test_main_window.py
 
 # Integration testing
 python scripts/integration_tests.py
@@ -473,10 +479,10 @@ git push origin feature/amazing-feature
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ### **Third-Party Acknowledgments**
-- FastAPI for the excellent web framework
+- PyQt6 for the excellent desktop UI framework
 - LangChain for AI integration capabilities
 - Playwright for browser automation
-- PyQt6 for desktop UI framework
+- Python community for the robust ecosystem
 
 ---
 
