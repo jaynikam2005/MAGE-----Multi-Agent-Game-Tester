@@ -286,26 +286,15 @@ MAGE---Multi-Agent-Game-Tester/
 │   │       └── enterprise_security.py  # Military-Grade Security
 │   │
 │   ├── 🧪 testing/                      # The Laboratory
-│   │   ├── webdriver_integration.py   # Browser Puppeteer
-│   │   ├── ai_behavior/               # AI Psychology Tests
-│   │   ├── game_engine/               # Game Logic Tests
-│   │   └── performance/               # Speed Demon Tests
+│   │   └── webdriver_integration.py   # Browser Puppeteer
 │   │
-│   ├── � reporting/
+│   ├── 📊 reporting/
 │   │   └── report_generator.py        # The Storyteller
-│   │
-│   ├── � integrations/               # External Connections
-│   │   ├── cloud/                     # Sky-High Integrations
-│   │   └── gaming_platforms/          # Game Platform Connectors
 │   │
 │   └── 🛠️ utils/                        # The Toolbox
 │       └── __init__.py                # Utility Belt
 │
-├── 🎯 artifacts/                        # Battle Trophies
-│   ├── screenshots/                    # Visual Evidence
-│   ├── recordings/                     # Video Proof
-│   └── logs/                          # Digital Breadcrumbs
-│
+
 ├── � reports/                          # War Chronicles
 │   ├── html/                          # Pretty Reports
 │   ├── json/                          # Raw Data
@@ -322,17 +311,21 @@ MAGE---Multi-Agent-Game-Tester/
 │   ├── shaders/                       # GPU Magic
 │   └── themes/                        # Style Sheets
 │
-├── � config/                          # Configuration Files
-├── � certs/                           # Security Certificates
-├── � build/                           # Compilation Artifacts
-├── 🚢 docker/                          # Containerization
-├── � docs/                            # Documentation
-├── � plugins/                         # Extensions
-├── � scripts/                         # Automation Scripts
-└── 🗂️ data/                            # Persistent Storage
-    ├── artifacts/                      # Test Artifacts
-    ├── screenshots/                    # Visual Evidence
-    └── sessions/                       # Session Data
+├── 📦 build/                           # Compilation Artifacts (PyInstaller output)
+├── 📋 logs/                            # Application Logs
+├── 🔄 backups/                         # Database Backups
+├── ⚙️ temp/                            # Temporary Files
+├── 🗂️ data/                            # Persistent Storage
+│   ├── artifacts/                      # Test Artifacts
+│   ├── screenshots/                    # Visual Evidence
+│   └── sessions/                       # Session Data
+│
+├── .env                               # Environment Variables (DO NOT COMMIT)
+├── .env.example                       # Environment Template  
+├── requirements.txt                   # Python Dependencies
+├── pyproject.toml                     # Poetry Configuration
+├── main.spec                          # PyInstaller Spec
+└── main.py                            # Application Entry Point
 ```
 
 ### **🏆 What Makes This Structure Special?**
