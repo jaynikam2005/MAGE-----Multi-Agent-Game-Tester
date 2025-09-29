@@ -40,24 +40,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
-app = FastAPI(
-    title="MAGE Enterprise API",
-    description="Multi-Agent Game Testing Enterprise API",
-    version="2.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc"
-)
-
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with actual origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Initialize components
 orchestrator = OrchestratorAgent()
 report_generator = ReportGenerator()
@@ -73,12 +55,23 @@ async def lifespan(app: FastAPI):
     # Shutdown (if needed)
     # await orchestrator.cleanup()
 
-# Update your FastAPI app initialization
+# Create FastAPI app
 app = FastAPI(
     title="MAGE Multi-Agent Game Tester API",
     description="Enterprise-grade AI-powered game testing platform",
     version="2.1.0",
-    lifespan=lifespan  # Add this line
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    lifespan=lifespan
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with actual origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
@@ -176,3 +169,13 @@ async def health_check():
             "database": "connected"
         }
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "src.api.server:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        log_level="info"
+    )
