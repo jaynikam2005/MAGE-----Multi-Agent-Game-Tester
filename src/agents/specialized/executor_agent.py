@@ -68,14 +68,17 @@ class ExecutorAgent:
     async def initialize(self) -> None:
         """Initialize the execution agent"""
         try:
-            # Check if Playwright is available and we're not in Python 3.13
-            if not PLAYWRIGHT_AVAILABLE:
+            # Check if Playwright is available
+            if not PLAYWRIGHT_AVAILABLE or sys.version_info >= (3, 13):
                 self.logger.info(f"Executor agent {self.agent_id} initialized in fallback mode (Playwright not available)")
                 self.playwright = None
                 self.browser = None
                 return
                 
-            self.playwright = await async_playwright().start()
+            # Suppress asyncio errors during Playwright startup
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self.playwright = await async_playwright().start()
             
             # Launch browser with advanced configuration
             self.browser = await self.playwright.chromium.launch(
