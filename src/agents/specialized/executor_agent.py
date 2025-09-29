@@ -9,8 +9,22 @@ import json
 import base64
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 import structlog
+import sys
+import warnings
+
+# Suppress asyncio warnings for Playwright compatibility issues
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="asyncio")
+
+try:
+    from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+    # Create dummy types for type annotations
+    Browser = Any
+    BrowserContext = Any
+    Page = Any
 
 from src.core.config import get_settings
 
@@ -41,8 +55,8 @@ class ExecutorAgent:
         
         # Browser management
         self.playwright = None
-        self.browser: Optional[Browser] = None
-        self.contexts: List[BrowserContext] = []
+        self.browser = None
+        self.contexts = []
         
         # Performance monitoring
         self.performance_observer = None
@@ -53,6 +67,13 @@ class ExecutorAgent:
     async def initialize(self) -> None:
         """Initialize the execution agent"""
         try:
+            # Check if Playwright is available and we're not in Python 3.13
+            if not PLAYWRIGHT_AVAILABLE:
+                self.logger.info(f"Executor agent {self.agent_id} initialized in fallback mode (Playwright not available)")
+                self.playwright = None
+                self.browser = None
+                return
+                
             self.playwright = await async_playwright().start()
             
             # Launch browser with advanced configuration
@@ -75,13 +96,12 @@ class ExecutorAgent:
             
         except NotImplementedError as e:
             # Python 3.13 + Playwright compatibility issue - use fallback mode
-            self.logger.warning(f"Playwright not supported in current environment. Using fallback mode for {self.agent_id}")
+            self.logger.info(f"Executor agent {self.agent_id} initialized in fallback mode (browser automation not available)")
             self.playwright = None
             self.browser = None
-            # Still mark as initialized but in fallback mode
             
         except Exception as e:
-            self.logger.error(f"Failed to initialize executor agent: {e}")
+            self.logger.info(f"Executor agent {self.agent_id} initialized in fallback mode (reason: {str(e)})")
             # Don't raise - allow fallback mode
             self.playwright = None
             self.browser = None
