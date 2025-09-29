@@ -62,11 +62,24 @@ app.add_middleware(
 orchestrator = OrchestratorAgent()
 report_generator = ReportGenerator()
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize components on startup"""
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
     await orchestrator.initialize()
     logger.info("Orchestrator initialized successfully")
+    yield
+    # Shutdown (if needed)
+    # await orchestrator.cleanup()
+
+# Update your FastAPI app initialization
+app = FastAPI(
+    title="MAGE Multi-Agent Game Tester API",
+    description="Enterprise-grade AI-powered game testing platform",
+    version="2.1.0",
+    lifespan=lifespan  # Add this line
+)
 
 @app.get("/")
 async def root():
