@@ -7,7 +7,7 @@ import asyncio
 import time
 import json
 import base64
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass
 import structlog
 import sys
@@ -21,10 +21,11 @@ try:
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
-    # Create dummy types for type annotations
-    Browser = Any
-    BrowserContext = Any
-    Page = Any
+    
+# Use Union types to handle when Playwright is not available
+BrowserType = Union[Any, None]
+BrowserContextType = Union[Any, None] 
+PageType = Union[Any, None]
 
 from src.core.config import get_settings
 
@@ -164,7 +165,7 @@ class ExecutorAgent:
                 "timestamp": end_time
             }
     
-    async def _create_test_context(self) -> BrowserContext:
+    async def _create_test_context(self) -> BrowserContextType:
         """Create isolated browser context for testing"""
         
         context = await self.browser.new_context(
@@ -228,7 +229,7 @@ class ExecutorAgent:
         self.contexts.append(context)
         return context
     
-    async def _setup_page_monitoring(self, page: Page) -> None:
+    async def _setup_page_monitoring(self, page: PageType) -> None:
         """Setup comprehensive page monitoring"""
         
         # Console log collection
@@ -252,7 +253,7 @@ class ExecutorAgent:
         """Log network responses"""
         self.logger.debug(f"Response: {response.status} {response.url}")
     
-    async def _execute_test_steps(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_test_steps(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Execute test steps with AI-enhanced decision making"""
         
         test_category = test_case.get("category", "core")
@@ -270,7 +271,7 @@ class ExecutorAgent:
         else:
             return await self._execute_generic_test(page, test_case)
     
-    async def _execute_core_functionality_test(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_core_functionality_test(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Execute core functionality tests"""
         
         target_url = "https://play.ezygamers.com/"  # From attached file
@@ -308,7 +309,7 @@ class ExecutorAgent:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    async def _detect_game_loaded_state(self, page: Page) -> bool:
+    async def _detect_game_loaded_state(self, page: PageType) -> bool:
         """AI-powered detection of game loaded state"""
         
         try:
@@ -357,7 +358,7 @@ class ExecutorAgent:
             self.logger.error(f"Error detecting game state: {e}")
             return False
     
-    async def _test_basic_interactions(self, page: Page) -> bool:
+    async def _test_basic_interactions(self, page: PageType) -> bool:
         """Test basic game interactions"""
         
         try:
@@ -400,7 +401,7 @@ class ExecutorAgent:
             self.logger.error(f"Error testing interactions: {e}")
             return False
     
-    async def _check_ui_responsiveness(self, page: Page) -> bool:
+    async def _check_ui_responsiveness(self, page: PageType) -> bool:
         """Check UI responsiveness"""
         
         try:
@@ -423,7 +424,7 @@ class ExecutorAgent:
             self.logger.error(f"Error checking UI responsiveness: {e}")
             return False
     
-    async def _execute_performance_test(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_performance_test(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Execute performance-focused tests"""
         
         try:
@@ -479,7 +480,7 @@ class ExecutorAgent:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    async def _execute_graphics_test(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_graphics_test(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Execute graphics and visual tests"""
         
         try:
@@ -526,21 +527,21 @@ class ExecutorAgent:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    async def _execute_ai_behavior_test(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_ai_behavior_test(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Execute AI behavior tests"""
         # Implementation for AI behavior testing
         return {"success": True, "ai_behavior": "validated"}
     
-    async def _execute_security_test(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_security_test(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Execute security tests"""
         # Implementation for security testing
         return {"success": True, "security_validated": True}
     
-    async def _execute_generic_test(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_generic_test(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Execute generic test case"""
         return {"success": True, "message": "Generic test executed"}
     
-    async def _collect_test_artifacts(self, page: Page, test_case: Dict[str, Any]) -> Dict[str, Any]:
+    async def _collect_test_artifacts(self, page: PageType, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Collect comprehensive test artifacts"""
         
         artifacts = {}
@@ -608,7 +609,7 @@ class ExecutorAgent:
         
         return analysis
     
-    async def _measure_load_time(self, page: Page) -> float:
+    async def _measure_load_time(self, page: PageType) -> float:
         """Measure page load time"""
         try:
             load_time = await page.evaluate("""
@@ -621,7 +622,7 @@ class ExecutorAgent:
         except:
             return 0.0
     
-    async def _count_ui_elements(self, page: Page) -> int:
+    async def _count_ui_elements(self, page: PageType) -> int:
         """Count interactive UI elements"""
         try:
             count = await page.evaluate("""
